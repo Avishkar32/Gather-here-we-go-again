@@ -60,7 +60,7 @@ const Canvas = () => {
   // Initialize canvas and socket
   const SOCKET_URL =
     process.env.NODE_ENV === "production"
-      ? "https://gather-office.onrender.com" // your production backend URL
+      ? "https://gatherbackend-production.up.railway.app/" // your production backend URL
       : "http://localhost:3001";
 
   useEffect(() => {
