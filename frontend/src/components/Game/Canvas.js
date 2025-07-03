@@ -338,7 +338,17 @@ const Canvas = () => {
         console.log("Caller got local stream:", localStream.getTracks());
         setVideoCall((vc) => ({ ...vc, localStream }));
 
-        pc = new window.RTCPeerConnection(iceConfig); // Use dynamic ICE config
+        // --- FIX: Ensure RTCConfiguration is always valid ---
+        let rtcConfig = iceConfig;
+        if (
+          !rtcConfig ||
+          typeof rtcConfig !== "object" ||
+          !Array.isArray(rtcConfig.iceServers)
+        ) {
+          rtcConfig = { iceServers: [] };
+        }
+        console.log("Using RTCConfiguration:", rtcConfig);
+        pc = new window.RTCPeerConnection(rtcConfig); // Use dynamic ICE config
         peerConnectionRef.current = pc;
 
         pc.oniceconnectionstatechange = () => {
