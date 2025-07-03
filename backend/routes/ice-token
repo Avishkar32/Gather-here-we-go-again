@@ -11,7 +11,11 @@ const client = twilio(accountSid, authToken);
 router.get('/', async (req, res) => {
   try {
     const token = await client.tokens.create();
+
+    console.log(token.iceServers);
+
     res.json({ iceServers: token.iceServers });
+    
   } catch (err) {
     console.error('Error generating ICE token:', err);
     res.status(500).json({ error: 'Failed to get ICE token' });
