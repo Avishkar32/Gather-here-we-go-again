@@ -9,6 +9,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.8.1",
+    "twilio": "^5.7.2",
     "web-vitals": "^5.0.2"
   },
   "scripts": {
