@@ -6,6 +6,8 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
+const iceTokenRoute = require('./routes/ice-token');
+
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -45,6 +47,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+app.use('/api/ice-token', iceTokenRoute);
 
 // File upload endpoint
 app.post("/upload", upload.single("file"), (req, res) => {

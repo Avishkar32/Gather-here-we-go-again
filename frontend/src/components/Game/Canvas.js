@@ -6,6 +6,7 @@ import "./styles.css";
 import useGame from "./useGame";
 import Chat from "./chat";
 import { MessageCircle } from "lucide-react";
+import axios from "axios";
 
 const Canvas = () => {
   const canvasRef = useRef(null);
@@ -32,6 +33,7 @@ const Canvas = () => {
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
   const [callPeerId, setCallPeerId] = useState(null);
+  const [iceConfig, setIceConfig] = useState(null); // <-- Add ICE config state
 
   const {
     player,
@@ -71,6 +73,21 @@ const Canvas = () => {
       socketRef.current.disconnect();
       cancelAnimationFrame(animationFrameRef.current);
     };
+  }, []);
+
+  // Fetch ICE servers from backend on mount
+  useEffect(() => {
+    const fetchIceServers = async () => {
+      try {
+        const res = await axios.get("/api/ice-token");
+        setIceConfig(res.data); // expects { iceServers: [...] }
+      } catch (err) {
+        console.error("Failed to fetch ICE servers:", err);
+        // fallback to public STUN if needed
+        setIceConfig({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+      }
+    };
+    fetchIceServers();
   }, []);
 
   // Handle name submission
@@ -208,14 +225,13 @@ const Canvas = () => {
     };
   }, [interactionMenu, playerName]);
 
-  // WebRTC config (use public STUN for demo)
-  const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-
   // Accept incoming call
   const handleAcceptCall = async () => {
     try {
+      if (!iceConfig) return; // Wait for ICE config
       setIncomingCall(null);
       setCallPeerId(incomingCall.callerId);
+      console.log(incomingCall);
       setVideoCall((vc) => ({ ...vc, active: true }));
 
       // Get local media
@@ -227,7 +243,7 @@ const Canvas = () => {
       setVideoCall((vc) => ({ ...vc, localStream }));
 
       // Create peer connection
-      const pc = new window.RTCPeerConnection(rtcConfig);
+      const pc = new window.RTCPeerConnection(iceConfig); // Use dynamic ICE config
       peerConnectionRef.current = pc;
 
       pc.oniceconnectionstatechange = () => {
@@ -301,7 +317,7 @@ const Canvas = () => {
 
   // Initiate call as caller
   useEffect(() => {
-    if (!callPeerId || !videoCall.active) return;
+    if (!callPeerId || !videoCall.active || !iceConfig) return; // Wait for ICE config
 
     let pc;
     let localStream;
@@ -322,7 +338,7 @@ const Canvas = () => {
         console.log("Caller got local stream:", localStream.getTracks());
         setVideoCall((vc) => ({ ...vc, localStream }));
 
-        pc = new window.RTCPeerConnection(rtcConfig);
+        pc = new window.RTCPeerConnection(iceConfig); // Use dynamic ICE config
         peerConnectionRef.current = pc;
 
         pc.oniceconnectionstatechange = () => {
@@ -407,7 +423,7 @@ const Canvas = () => {
         pc.close();
       }
     };
-  }, [callPeerId, videoCall.active]);
+  }, [callPeerId, videoCall.active, iceConfig]);
 
   // Cleanup on call end
   const handleEndCall = () => {
