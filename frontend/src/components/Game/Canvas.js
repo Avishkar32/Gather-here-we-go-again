@@ -58,10 +58,8 @@ const Canvas = () => {
   } = useGame(canvasRef, socketRef, keysRef);
 
   // Initialize canvas and socket
-  const SOCKET_URL =
-    process.env.NODE_ENV === "production"
-      ? "https://gatherbackend-production.up.railway.app/" // your production backend URL
-      : "http://localhost:3001";
+  const SOCKET_URL = "https://gather-here-we-go-again-production.up.railway.app/" // your production backend URL
+      
 
   useEffect(() => {
     const canvas = canvasRef.current;
