@@ -33,8 +33,8 @@ const Canvas = () => {
   const remoteVideoRef = useRef(null);
   const localVideoRef = useRef(null);
   const [callPeerId, setCallPeerId] = useState(null);
-  const [iceConfig, setIceConfig] = useState(null); // <-- Add ICE config state
-  const iceCandidateQueue = useRef([]);
+  const [iceConfig, setIceConfig] = useState(null);
+  const iceCandidateQueue = useRef({}); // { peerId: [candidates] }
 
   const {
     player,
@@ -232,7 +232,6 @@ const Canvas = () => {
       if (!iceConfig) return; // Wait for ICE config
       setIncomingCall(null);
       setCallPeerId(incomingCall.callerId);
-      console.log(incomingCall);
       setVideoCall((vc) => ({ ...vc, active: true }));
 
       // Get local media
@@ -240,20 +239,18 @@ const Canvas = () => {
         video: true,
         audio: true,
       });
-      console.log("Got local stream:", localStream.getTracks());
       setVideoCall((vc) => ({ ...vc, localStream }));
 
-      // --- FIX: Ensure RTCConfiguration is always valid ---
+      // --- Ensure RTCConfiguration is always valid ---
       let rtcConfig = iceConfig;
       if (
         !rtcConfig ||
         typeof rtcConfig !== "object" ||
         !Array.isArray(rtcConfig.iceServers)
       ) {
-        rtcConfig = { iceServers: [] };
+        rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
       }
-      console.log("Using RTCConfiguration (receiver):", rtcConfig);
-      const pc = new window.RTCPeerConnection(rtcConfig); // Use dynamic ICE config
+      const pc = new window.RTCPeerConnection(rtcConfig);
       peerConnectionRef.current = pc;
 
       pc.oniceconnectionstatechange = () => {
@@ -262,14 +259,12 @@ const Canvas = () => {
 
       // Add local tracks
       localStream.getTracks().forEach((track) => {
-        console.log("Adding local track:", track.kind);
         pc.addTrack(track, localStream);
       });
 
       // Send ICE candidates
       pc.onicecandidate = (event) => {
         if (event.candidate && socketRef.current) {
-          console.log("Sending ICE candidate:", event.candidate);
           socketRef.current.emit("ice-candidate", {
             to: incomingCall.callerId,
             candidate: event.candidate,
@@ -279,9 +274,7 @@ const Canvas = () => {
 
       // Receive remote stream
       pc.ontrack = (event) => {
-        console.log("Received remote track:", event.track.kind);
         if (event.streams && event.streams[0]) {
-          console.log("Setting remote stream");
           setVideoCall((vc) => ({ ...vc, remoteStream: event.streams[0] }));
         }
       };
@@ -290,33 +283,38 @@ const Canvas = () => {
       socketRef.current.off("offer");
       socketRef.current.off("ice-candidate");
 
+      // ICE candidate queue for this peer
+      iceCandidateQueue.current[incomingCall.callerId] = [];
+
       // Create and send answer
       socketRef.current.on("offer", async ({ from, offer }) => {
-        console.log("Received offer, creating answer");
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        // Add queued ICE candidates
-        iceCandidateQueue.current.forEach(async (candidate) => {
-          try {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate));
-          } catch (err) {
-            console.error("Error adding queued ICE candidate:", err);
+        // Add queued ICE candidates for this peer
+        if (iceCandidateQueue.current[from]) {
+          for (const candidate of iceCandidateQueue.current[from]) {
+            try {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (err) {
+              console.error("Error adding queued ICE candidate:", err);
+            }
           }
-        });
-        iceCandidateQueue.current = [];
+          iceCandidateQueue.current[from] = [];
+        }
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         socketRef.current.emit("answer", { to: from, answer });
       });
 
       // Listen for ICE candidates
-      socketRef.current.on("ice-candidate", async ({ candidate }) => {
+      socketRef.current.on("ice-candidate", async ({ from, candidate }) => {
         try {
           if (candidate) {
             if (pc.remoteDescription && pc.remoteDescription.type) {
               await pc.addIceCandidate(new RTCIceCandidate(candidate));
             } else {
               // Queue ICE candidates until remoteDescription is set
-              iceCandidateQueue.current.push(candidate);
+              if (!iceCandidateQueue.current[from]) iceCandidateQueue.current[from] = [];
+              iceCandidateQueue.current[from].push(candidate);
             }
           }
         } catch (err) {
@@ -334,14 +332,13 @@ const Canvas = () => {
 
   // Initiate call as caller
   useEffect(() => {
-    if (!callPeerId || !videoCall.active || !iceConfig) return; // Wait for ICE config
+    if (!callPeerId || !videoCall.active || !iceConfig) return;
 
     let pc;
     let localStream;
 
     const startCaller = async () => {
       try {
-        // Clean up any existing connection
         if (peerConnectionRef.current) {
           peerConnectionRef.current.close();
           peerConnectionRef.current = null;
@@ -352,7 +349,6 @@ const Canvas = () => {
           video: true,
           audio: true,
         });
-        console.log("Caller got local stream:", localStream.getTracks());
         setVideoCall((vc) => ({ ...vc, localStream }));
 
         // --- FIX: Ensure RTCConfiguration is always valid ---
@@ -362,10 +358,9 @@ const Canvas = () => {
           typeof rtcConfig !== "object" ||
           !Array.isArray(rtcConfig.iceServers)
         ) {
-          rtcConfig = { iceServers: [] };
+          rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
         }
-        console.log("Using RTCConfiguration:", rtcConfig);
-        pc = new window.RTCPeerConnection(rtcConfig); // Use dynamic ICE config
+        pc = new window.RTCPeerConnection(rtcConfig);
         peerConnectionRef.current = pc;
 
         pc.oniceconnectionstatechange = () => {
@@ -374,14 +369,11 @@ const Canvas = () => {
 
         // Add local tracks
         localStream.getTracks().forEach((track) => {
-          console.log("Caller adding track:", track.kind);
           pc.addTrack(track, localStream);
         });
 
-        // ICE candidates
         pc.onicecandidate = (event) => {
           if (event.candidate && socketRef.current) {
-            console.log("Caller sending ICE candidate:", event.candidate);
             socketRef.current.emit("ice-candidate", {
               to: callPeerId,
               candidate: event.candidate,
@@ -389,11 +381,8 @@ const Canvas = () => {
           }
         };
 
-        // Remote stream
         pc.ontrack = (event) => {
-          console.log("Caller received track:", event.track.kind);
           if (event.streams && event.streams[0]) {
-            console.log("Caller setting remote stream");
             setVideoCall((vc) => ({ ...vc, remoteStream: event.streams[0] }));
           }
         };
@@ -403,29 +392,43 @@ const Canvas = () => {
         socketRef.current.off("ice-candidate");
         socketRef.current.off("acceptCall");
 
-        // Set up new listeners
-        socketRef.current.on("answer", async ({ answer }) => {
-          console.log("Received answer from callee");
+        // ICE candidate queue for this peer
+        iceCandidateQueue.current[callPeerId] = [];
+
+        socketRef.current.on("answer", async ({ from, answer }) => {
           if (pc.signalingState !== "closed") {
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            // Add queued ICE candidates for this peer
+            if (iceCandidateQueue.current[from]) {
+              for (const candidate of iceCandidateQueue.current[from]) {
+                try {
+                  await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (err) {
+                  console.error("Error adding queued ICE candidate:", err);
+                }
+              }
+              iceCandidateQueue.current[from] = [];
+            }
           }
         });
 
-        socketRef.current.on("ice-candidate", async ({ candidate }) => {
+        socketRef.current.on("ice-candidate", async ({ from, candidate }) => {
           try {
-            if (candidate && pc.remoteDescription) {
-              console.log("Caller received ICE candidate");
-              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            if (candidate) {
+              if (pc.remoteDescription && pc.remoteDescription.type) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+              } else {
+                if (!iceCandidateQueue.current[from]) iceCandidateQueue.current[from] = [];
+                iceCandidateQueue.current[from].push(candidate);
+              }
             }
           } catch (err) {
             console.error("Error adding received ICE candidate:", err);
           }
         });
 
-        // When receiver accepts, create and send offer
         socketRef.current.on("acceptCall", async () => {
           try {
-            console.log("Call accepted, creating offer");
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
             socketRef.current.emit("offer", { to: callPeerId, offer });
