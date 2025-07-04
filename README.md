@@ -2,25 +2,30 @@
 
 A **real-time 2D virtual world** where users can **move around, chat, and video call** — built with **React.js**, **Node.js (Express)**, **WebSockets**, and **WebRTC**.
 
-This project reimagines online interaction by combining **live text chat** and **peer-to-peer video communication** inside a **dynamic 2D environment**.  
-Inspired by **Gather Town**, it creates an engaging and social remote experience.
-
+Inspired by **Gather Town**, this project brings spatial video interaction into a web-based multiplayer experience — blending chat, visuals, and P2P media to create meaningful online presence. 
 ---
+
+![Live Demo](https://ibb.co/qM4Db1dk)
+
 
 ## 🚀 Features
 
 - 🧍 Move your avatar freely across a customizable 2D map
 - 💬 Instant real-time messaging powered by **WebSockets**
 - 🎥 Seamless peer-to-peer video calling using **WebRTC**
+- 🌐 **TURN/STUN Support** – Powered by **Twilio** to ensure reliable connectivity across networks  
 - ⚡ Low-latency server-client communication
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React.js, WebRTC APIs, Socket.IO-client
-- **Backend:** Node.js, Express.js, Socket.IO-server
-- **Real-time Communication:** WebSockets + WebRTC
+| Layer              | Technology                              |
+|--------------------|------------------------------------------|
+| **Frontend**        | React.js, Socket.IO-client, WebRTC APIs |
+| **Backend**         | Node.js, Express.js, Socket.IO          |
+| **Signaling**       | WebSockets via Socket.IO                |
+| **Media Transport** | WebRTC + **Twilio TURN/STUN** servers   |
 
 ---
 
