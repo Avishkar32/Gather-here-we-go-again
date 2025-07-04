@@ -332,7 +332,24 @@ const useGame = (canvasRef, socketRef, keysRef) => {
         if (meetingPeerConnections.current[participantId]) {
           return meetingPeerConnections.current[participantId];
         }
-        const pc = new RTCPeerConnection(iceConfig); // Use dynamic ICE config
+        // --- Ensure RTCConfiguration is always valid and log it ---
+        let rtcConfig = iceConfig;
+        if (
+          !rtcConfig ||
+          typeof rtcConfig !== "object" ||
+          !Array.isArray(rtcConfig.iceServers)
+        ) {
+          rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+        }
+        console.log("MeetingRoom: Using RTCConfiguration for", participantId, rtcConfig);
+
+        let pc;
+        try {
+          pc = new RTCPeerConnection(rtcConfig);
+        } catch (err) {
+          console.error("MeetingRoom: Failed to create RTCPeerConnection for", participantId, err, rtcConfig);
+          throw err;
+        }
         meetingPeerConnections.current[participantId] = pc;
 
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
@@ -347,16 +364,22 @@ const useGame = (canvasRef, socketRef, keysRef) => {
         };
 
         pc.ontrack = (event) => {
-          setMeetingRoomCall((prev) => {
-            // Always update the stream for this participant
-            return {
-              ...prev,
-              remoteStreams: {
-                ...prev.remoteStreams,
-                [participantId]: event.streams[0],
-              },
-            };
-          });
+          // Only set remote stream if it's not our own stream
+          if (event.streams && event.streams[0] && event.streams[0].id !== stream.id) {
+            setMeetingRoomCall((prev) => {
+              return {
+                ...prev,
+                remoteStreams: {
+                  ...prev.remoteStreams,
+                  [participantId]: event.streams[0],
+                },
+              };
+            });
+          }
+        };
+
+        pc.onconnectionstatechange = () => {
+          console.log(`MeetingRoom: Peer ${participantId} connection state:`, pc.connectionState);
         };
 
         return pc;
