@@ -2,10 +2,12 @@
 
 A **real-time 2D virtual world** where users can **move around, chat, and video call** — built with **React.js**, **Node.js (Express)**, **WebSockets**, and **WebRTC**.
 
-Inspired by **Gather Town**, this project brings spatial video interaction into a web-based multiplayer experience — blending chat, visuals, and P2P media to create meaningful online presence. 
+Inspired by **Gather Town**, this project brings spatial video interaction into a web-based multiplayer experience — blending chat, visuals, and P2P media to create meaningful online presence.
+
+
 ---
 
-![Live Demo](https://i.ibb.co/HDMKmgVn/Screenshot-2025-07-04-145711.png)
+(https://i.ibb.co/XxssM0vD/Screenshot-2025-07-04-213942.png)
 
 
 ## 🚀 Features
