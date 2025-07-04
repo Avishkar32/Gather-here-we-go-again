@@ -7,7 +7,7 @@ Inspired by **Gather Town**, this project brings spatial video interaction into 
 
 ---
 
-(https://i.ibb.co/XxssM0vD/Screenshot-2025-07-04-213942.png)
+![2D Metaverse Demo](https://i.ibb.co/XxssM0vD/Screenshot-2025-07-04-213942.png)
 
 
 ## 🚀 Features
