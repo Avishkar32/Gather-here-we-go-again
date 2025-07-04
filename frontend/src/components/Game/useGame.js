@@ -157,26 +157,53 @@ const useGame = (canvasRef, socketRef, keysRef) => {
     [playerImages]
   );
 
+  // const handlePlayerMoved = useCallback(
+  //   (playerInfo) => {
+  //     //console.log('Player moved:', playerInfo);
+  //     setOtherPlayers((prev) => {
+  //       const existing = prev[playerInfo.id];
+  //       if (existing) {
+  //         const updatedPlayer = new Sprite({
+  //           position: playerInfo.position,
+  //           image: playerImages?.[playerInfo.direction] || playerImages?.down,
+  //           frames: { max: 4 },
+  //           sprites: playerImages,
+  //           name: existing.name,
+  //           id: existing.id,
+  //           speed: existing.speed,
+  //           lastDirection: playerInfo.direction,
+  //           moving: playerInfo.moving,
+  //         });
+  //         return {
+  //           ...prev,
+  //           [playerInfo.id]: updatedPlayer,
+  //         };
+  //       }
+  //       return prev;
+  //     });
+  //   },
+  //   [playerImages]
+  // );
+
   const handlePlayerMoved = useCallback(
     (playerInfo) => {
-      //console.log('Player moved:', playerInfo);
       setOtherPlayers((prev) => {
         const existing = prev[playerInfo.id];
         if (existing) {
-          const updatedPlayer = new Sprite({
-            position: playerInfo.position,
-            image: playerImages?.[playerInfo.direction] || playerImages?.down,
-            frames: { max: 4 },
-            sprites: playerImages,
-            name: existing.name,
-            id: existing.id,
-            speed: existing.speed,
-            lastDirection: playerInfo.direction,
-            moving: playerInfo.moving,
-          });
+          // Update all fields, including name!
           return {
             ...prev,
-            [playerInfo.id]: updatedPlayer,
+            [playerInfo.id]: new Sprite({
+              position: playerInfo.position,
+              image: playerImages?.[playerInfo.direction] || playerImages?.down,
+              frames: { max: 4 },
+              sprites: playerImages,
+              name: playerInfo.name, // <-- make sure this is updated!
+              id: playerInfo.id,
+              speed: existing.speed,
+              lastDirection: playerInfo.direction,
+              moving: playerInfo.moving,
+            }),
           };
         }
         return prev;
