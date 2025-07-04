@@ -5,7 +5,7 @@ A **real-time 2D virtual world** where users can **move around, chat, and video 
 Inspired by **Gather Town**, this project brings spatial video interaction into a web-based multiplayer experience — blending chat, visuals, and P2P media to create meaningful online presence. 
 ---
 
-![Live Demo](https://ibb.co/qM4Db1dk)
+![Live Demo](https://i.ibb.co/HDMKmgVn/Screenshot-2025-07-04-145711.png)
 
 
 ## 🚀 Features
