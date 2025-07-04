@@ -34,6 +34,7 @@ const Canvas = () => {
   const localVideoRef = useRef(null);
   const [callPeerId, setCallPeerId] = useState(null);
   const [iceConfig, setIceConfig] = useState(null); // <-- Add ICE config state
+  const iceCandidateQueue = useRef([]);
 
   const {
     player,
@@ -293,6 +294,15 @@ const Canvas = () => {
       socketRef.current.on("offer", async ({ from, offer }) => {
         console.log("Received offer, creating answer");
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        // Add queued ICE candidates
+        iceCandidateQueue.current.forEach(async (candidate) => {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (err) {
+            console.error("Error adding queued ICE candidate:", err);
+          }
+        });
+        iceCandidateQueue.current = [];
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         socketRef.current.emit("answer", { to: from, answer });
@@ -302,13 +312,11 @@ const Canvas = () => {
       socketRef.current.on("ice-candidate", async ({ candidate }) => {
         try {
           if (candidate) {
-            console.log("Received ICE candidate");
-            if (pc.remoteDescription) {
+            if (pc.remoteDescription && pc.remoteDescription.type) {
               await pc.addIceCandidate(new RTCIceCandidate(candidate));
             } else {
-              console.log(
-                "Waiting for remote description before adding ICE candidate"
-              );
+              // Queue ICE candidates until remoteDescription is set
+              iceCandidateQueue.current.push(candidate);
             }
           }
         } catch (err) {
