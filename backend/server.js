@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
+
 const iceTokenRoute = require('./routes/ice-token');
 
 // Create uploads directory if it doesn't exist
@@ -56,7 +57,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
   res.json({
-    filePath: `https://gather-office.onrender.com/${req.file.filename}`,
+    filePath: `"https://gather-here-we-go-again-production.up.railway.app/${req.file.filename}`,
   });
 });
 
