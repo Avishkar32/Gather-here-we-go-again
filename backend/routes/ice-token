@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 const twilio = require('twilio');
 
-const accountSid = "AC2b32cfbf7ef504b2d206574bb46935fb";
-const authToken = "3941c7e132c80c18e760e125e20ca8ab";
+require('dotenv').config();
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 const client = twilio(accountSid, authToken);
 
