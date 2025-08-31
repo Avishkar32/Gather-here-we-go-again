@@ -58,6 +58,9 @@ app.post("/upload", upload.single("file"), (req, res) => {
   }
   res.json({
     filePath: `https://gather-here-we-go-again-production.up.railway.app/${req.file.filename}`,
+
+    gather-here-we-go-again-production.up.railway.app
+    gather-here-we-go-again-production.up.railway.app
   });
 });
 

@@ -42,6 +42,8 @@ const Canvas = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [meetingMuteStates, setMeetingMuteStates] = useState({}); // { userId: boolean }
   const [meetingNameMap, setMeetingNameMap] = useState({}); // { userId: name }
+  // Add intro modal state
+  const [showIntroModal, setShowIntroModal] = useState(true);
 
   const {
     player,
@@ -741,41 +743,211 @@ const Canvas = () => {
 
   return (
     <div className="game-container" ref={gameContainerRef}>
-      {/* Conference Room Banner (show on hover or when inside) */}
-      {(isPlayerInConferenceRoom || hoverConferenceRoom) && (
-        <div
-          style={{
-            position: "fixed",
-            top: 32,
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "linear-gradient(90deg, #4a6cf7 0%, #43e97b 100%)",
-            color: "#fff",
-            padding: "16px 48px",
-            borderRadius: "16px",
-            fontSize: "22px",
-            fontWeight: "bold",
-            letterSpacing: "1.5px",
-            zIndex: 5000,
-            boxShadow: "0 4px 24px #4a6cf799, 0 0px 0px #0000",
-            border: "2.5px solid #fff",
-            textShadow: "0 2px 8px #2228",
-            fontFamily: "'Press Start 2P', 'VT323', 'monospace', monospace",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            pointerEvents: "none",
-            opacity: isPlayerInConferenceRoom ? 1 : 0.85,
-          }}
-        >
-          <span role="img" aria-label="Conference" style={{ fontSize: 28 }}>
-            🏢
-          </span>
-          Conference Room
+      {/* Intro Modal */}
+      {showIntroModal && (
+        <div className="intro-modal-backdrop" style={{
+          position: "fixed",
+          left: 0, right: 0, top: 0, bottom: 0,
+          background: "rgba(18, 18, 22, 0.85)", // less purple, more neutral/dark
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <div
+            className="intro-modal"
+            style={{
+              background: "linear-gradient(135deg, #18181b 0%, #232136 70%, #7c3aed 100%)",
+              borderRadius: "32px",
+              padding: "48px 32px 48px 32px", // more padding
+              boxShadow: "0 12px 48px #000a, 0 0px 0px #0000",
+              textAlign: "center",
+              width: "45vw",
+              maxWidth: "70vw",
+              minHeight: "600px",
+              maxHeight: "80vh",
+              border: "2px solid #7c3aed",
+              fontFamily: "monospace, 'Press Start 2P', 'VT323'", // monospace font
+              color: "#e0e6ff",
+              letterSpacing: "1px",
+              userSelect: "none",
+              position: "relative",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#a78bfa #232136",
+            }}
+          >
+            <style>
+              {`
+                .intro-modal::-webkit-scrollbar {
+                  width: 10px;
+                  border-radius: 8px;
+                  background: #232136;
+                }
+                .intro-modal::-webkit-scrollbar-thumb {
+                  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+                  border-radius: 8px;
+                  border: 2px solid #232136;
+                }
+                .intro-modal::-webkit-scrollbar-track {
+                  background: #18181b;
+                  border-radius: 8px;
+                }
+              `}
+            </style>
+            <h2 style={{
+              fontWeight: "bold",
+              fontSize: "2.2rem",
+              marginBottom: "18px",
+              textShadow: "0 2px 8px #7c3aed44", // less purple
+              fontFamily: "inherit"
+            }}>
+              Step into 
+
+              <img src="/images/Gather2.png"
+                  alt="logo"
+                  style={{
+                    width: "120%",
+                    maxWidth: "360px",
+                    height: "120px",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    
+              }} />
+            </h2>
+            <div style={{
+              fontSize: "1.15rem",
+              marginBottom: "28px",
+              lineHeight: "1.6",
+              color: "#bdb4d8",
+              fontFamily: "inherit"
+            }}>
+            A virtual space where you can explore, meet others, and chat or video call — just like a real office or event, but online!
+            </div>
+            <div style={{ marginBottom: "22px", width: "100%" }}>
+              <div style={{
+                marginBottom: "32px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "inherit"
+              }}>
+                
+                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "1.1rem", fontFamily: "inherit" }}>Move: Arrow keys</span>
+                <div style={{ color: "#bdb4d8", marginBottom: 8, fontFamily: "inherit" }}>Use arrow keys to move your player around the map.</div>
+                <img src="/images/Pixel art keyboard arrow keys_ Keyboard play keys vector icon for 8bit game on white background.jpeg"
+                  alt="Arrow keys"
+                  style={{
+                    height: "36vh",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    borderRadius: 12,
+                    background: "#232136",
+                    border: "2px solid #7c3aed",
+                    boxShadow: "0 2px 12px #7c3aed22"
+                  }} />
+              </div>
+              <div style={{
+                marginBottom: "32px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "inherit"
+              }}>
+                
+                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "1.1rem", fontFamily: "inherit" }}>1-1 Video Call</span>
+                <div style={{ color: "#bdb4d8", marginBottom: 8, fontFamily: "inherit" }}>Interact with others for private video calls.</div>
+                <img src="/images/vc.png"
+                  alt="Video Call"
+                  style={{
+                    
+                    height: "36vh",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    borderRadius: 12,
+                    background: "#232136",
+                    border: "2px solid #7c3aed",
+                    boxShadow: "0 2px 12px #7c3aed22"
+                  }} />
+              </div>
+              <div style={{
+                marginBottom: "32px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "inherit"
+              }}>
+                
+                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "1.1rem", fontFamily: "inherit" }}>Conference rooms</span>
+                <div style={{ color: "#bdb4d8", marginBottom: 8, fontFamily: "inherit" }}>Step inside the conference room to join the group video conference.</div>
+                <img src="/images/conference.png"
+                  alt="Conference Room"
+                  style={{
+                    height: "36vh",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    borderRadius: 12,
+                    background: "#232136",
+                    border: "2px solid #7c3aed",
+                    boxShadow: "0 2px 12px #7c3aed22"
+                  }} />
+              </div>
+              <div style={{
+                marginBottom: "32px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "inherit"
+              }}>
+                
+                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "1.1rem", fontFamily: "inherit" }}>Chat with anyone in the room</span>
+                <div style={{ color: "#bdb4d8", marginBottom: 8, fontFamily: "inherit" }}>Send messages to anyone in the space.</div>
+                <img src="/images/chat.png"
+                  alt="Chat"
+                  style={{
+                    height: "36vh",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    borderRadius: 12,
+                    background: "#232136",
+                    border: "2px solid #7c3aed",
+                    boxShadow: "0 2px 12px #7c3aed22"
+                  }} />
+              </div>
+            </div>
+            <button
+              style={{
+                background: "linear-gradient(90deg, #232136 0%, #7c3aed 100%)", // less purple, more dark
+                color: "#fff",
+                border: "none",
+                borderRadius: "14px",
+                padding: "18px 0",
+                width: "80%",
+                fontSize: "1.15rem",
+                fontFamily: "inherit",
+                fontWeight: "bold",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px #7c3aed22",
+                letterSpacing: "1px",
+                marginTop: "18px",
+                transition: "background 0.2s"
+              }}
+              onClick={() => setShowIntroModal(false)}
+            >
+              Let's dive in ✨
+            </button>
+          </div>
         </div>
       )}
       {/* Name Input Modal */}
-      {showNameModal && (
+      {showNameModal && !showIntroModal && (
         <div className="name-modal-backdrop">
           <div className="name-modal">
             <h2 style={{ color: "black" }}>Enter Your Player Name</h2>
