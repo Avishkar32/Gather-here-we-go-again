@@ -280,8 +280,7 @@ const useGame = (canvasRef, socketRef, keysRef) => {
   const findValidSpawnPosition = useCallback(() => {
     for (let i = 0; i < 100; i++) {
       const x = Math.floor(Math.random() * (MAP_WIDTH - 60)) + 30;
-      const y = Math.floor(Math.random() * (MAP_HEIGHT - 60)) + 30;
-
+      const y = Math.floor(Math.random() * (MAP_HEIGHT - 120));
       if (!checkCollision(x, y)) {
         console.log("Found valid spawn position:", { x, y });
         return { x, y };
