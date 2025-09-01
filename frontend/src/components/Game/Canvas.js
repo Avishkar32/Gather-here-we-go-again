@@ -76,32 +76,10 @@ const Canvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     setCtx(context);
-
-    // Try websocket first, fallback to polling if error
-    let triedPolling = false;
-    function connectSocket(transports) {
-      try {
-        socketRef.current = io(SOCKET_URL, { transports });
-        socketRef.current.on("connect_error", (err) => {
-          if (!triedPolling && transports.includes("websocket")) {
-            triedPolling = true;
-            // Try polling fallback
-            socketRef.current = io(SOCKET_URL, { transports: ["polling"] });
-            setToast("WebSocket failed, using polling fallback");
-          }
-        });
-      } catch (e) {
-        if (!triedPolling && transports.includes("websocket")) {
-          triedPolling = true;
-          socketRef.current = io(SOCKET_URL, { transports: ["polling"] });
-          setToast("WebSocket failed, using polling fallback");
-        }
-      }
-    }
-    connectSocket(["websocket", "polling"]);
+    socketRef.current = io(SOCKET_URL, { transports: ["websocket"] }); // use correct URL and force websocket
 
     return () => {
-      if (socketRef.current) socketRef.current.disconnect();
+      socketRef.current.disconnect();
       cancelAnimationFrame(animationFrameRef.current);
     };
   }, []);
@@ -859,7 +837,7 @@ const Canvas = () => {
                 fontFamily: "inherit"
               }}>
                 
-                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "2 rem", fontFamily: "inherit" }}>Move: Arrow keys</span>
+                <span style={{ fontWeight: "bold", color: "#a78bfa", fontSize: "1.1rem", fontFamily: "inherit" }}>Move: Arrow keys</span>
                 <div style={{ color: "#bdb4d8", marginBottom: 8, fontFamily: "inherit" }}>Use arrow keys to move your player around the map.</div>
                 <img src="/images/Pixel art keyboard arrow keys_ Keyboard play keys vector icon for 8bit game on white background.jpeg"
                   alt="Arrow keys"
