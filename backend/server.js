@@ -22,13 +22,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin:"*",
+    origin: "*",
     methods: ["GET", "POST"],
-    // Add this line to allow polling transport
-    transports: ["websocket", "polling"],
   },
-  // Also add transports here for socket.io itself
-  transports: ["websocket", "polling"],
 });
 
 // Game state
@@ -59,7 +55,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   }
   res.json({
     filePath: `https://gather-here-we-go-again-production.up.railway.app/${req.file.filename}`,
-
   });
 });
 
