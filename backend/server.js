@@ -27,7 +27,11 @@ const io = new Server(server, {
       "https://your-frontend-domain.vercel.app", // <-- add your deployed frontend domain here
     ],
     methods: ["GET", "POST"],
+    // Add this line to allow polling transport
+    transports: ["websocket", "polling"],
   },
+  // Also add transports here for socket.io itself
+  transports: ["websocket", "polling"],
 });
 
 // Game state
@@ -59,8 +63,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   res.json({
     filePath: `https://gather-here-we-go-again-production.up.railway.app/${req.file.filename}`,
 
-    gather-here-we-go-again-production.up.railway.app
-    gather-here-we-go-again-production.up.railway.app
   });
 });
 
