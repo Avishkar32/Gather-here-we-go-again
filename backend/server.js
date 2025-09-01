@@ -22,10 +22,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "https://your-frontend-domain.vercel.app", // <-- add your deployed frontend domain here
-    ],
+    origin:"*",
     methods: ["GET", "POST"],
     // Add this line to allow polling transport
     transports: ["websocket", "polling"],
