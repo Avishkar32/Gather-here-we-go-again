@@ -42,8 +42,10 @@ const Canvas = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [meetingMuteStates, setMeetingMuteStates] = useState({}); // { userId: boolean }
   const [meetingNameMap, setMeetingNameMap] = useState({}); // { userId: name }
-  // Add intro modal state
+  // Add intro modal states
   const [showIntroModal, setShowIntroModal] = useState(true);
+  // Add connection issue state
+  const [connectionIssue, setConnectionIssue] = useState(false);
 
   const {
     player,
@@ -77,6 +79,17 @@ const Canvas = () => {
     const context = canvas.getContext("2d");
     setCtx(context);
     socketRef.current = io(SOCKET_URL, { transports: ["websocket", "polling"] }); // use correct URL
+
+    // Listen for connection errors
+    socketRef.current.on("connect_error", (err) => {
+      setConnectionIssue(true);
+    });
+    socketRef.current.on("disconnect", () => {
+      setConnectionIssue(true);
+    });
+    socketRef.current.on("connect", () => {
+      setConnectionIssue(false);
+    });
 
     return () => {
       socketRef.current.disconnect();
@@ -1590,6 +1603,83 @@ const Canvas = () => {
           >
             +10 XP for socializing!
           </div>
+        </div>
+      )}
+      {/* Connection Issue Toast */}
+      {connectionIssue && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            right: "30px",
+            background: "linear-gradient(90deg, #23272e 0%, #3a3f4b 100%)",
+            color: "#fff",
+            padding: "22px 38px 22px 38px",
+            borderRadius: "18px",
+            fontSize: "18px",
+            zIndex: 5000,
+            boxShadow: "0 4px 24px #000a",
+            border: "4px solid #ff4b4b",
+            fontFamily: "'Press Start 2P', 'VT323', 'monospace', monospace",
+            minWidth: "340px",
+            maxWidth: "420px",
+            textAlign: "left",
+            letterSpacing: "1px",
+            userSelect: "none",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span
+              style={{
+                fontSize: 28,
+                filter: "drop-shadow(0 2px 0 #222)",
+                marginRight: 4,
+              }}
+              role="img"
+              aria-label="Warning"
+            >
+              ⚠️
+            </span>
+            <span
+              style={{
+                fontWeight: "bold",
+                color: "#ffe066",
+                textShadow: "0 2px 0 #222, 0 0px 8px #ffe06699",
+                fontSize: 20,
+                letterSpacing: "2px",
+              }}
+            >
+              Connection issue detected
+            </span>
+          </div>
+          <div style={{ marginTop: 10, fontSize: 15, color: "#fff" }}>
+            Real-time updates may not work due to network restrictions or firewall settings.<br />
+            Try switching to a different network or mobile data.
+          </div>
+          <button
+            style={{
+              marginTop: 18,
+              alignSelf: "flex-end",
+              background: "linear-gradient(90deg, #ff4b4b 0%, #ffb199 100%)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              padding: "8px 22px",
+              fontSize: 16,
+              fontFamily: "inherit",
+              fontWeight: "bold",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px #ff4b4b44",
+              letterSpacing: "1px",
+              transition: "background 0.2s",
+            }}
+            onClick={() => setConnectionIssue(false)}
+          >
+            Dismiss
+          </button>
         </div>
       )}
     </div>
