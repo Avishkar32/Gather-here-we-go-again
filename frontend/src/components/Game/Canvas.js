@@ -76,7 +76,7 @@ const Canvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     setCtx(context);
-    socketRef.current = io(SOCKET_URL, { transports: ["websocket"] }); // use correct URL and force websocket
+    socketRef.current = io(SOCKET_URL, { transports: ["websocket", "polling"] }); // use correct URL
 
     return () => {
       socketRef.current.disconnect();
