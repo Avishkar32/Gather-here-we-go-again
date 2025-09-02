@@ -839,6 +839,7 @@ const Canvas = () => {
               fontFamily: "inherit"
             }}>
             A virtual space where you can explore, meet others, and chat or video call — just like a real office or event, but online!
+              (PS: Access from laptop or desktop)
             </div>
             <div style={{ marginBottom: "22px", width: "100%" }}>
               <div style={{
