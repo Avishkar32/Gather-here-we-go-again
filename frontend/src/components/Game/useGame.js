@@ -101,7 +101,7 @@ const useGame = (canvasRef, socketRef, keysRef) => {
   useEffect(() => {
     const fetchIceServers = async () => {
       try {
-        const res = await axios.get("/api/ice-token");
+        const res = await axios.get("https://gather-here-we-go-again-production.up.railway.app/api/ice-token");
         setIceConfig(res.data); // expects { iceServers: [...] }
       } catch (err) {
         console.error("Failed to fetch ICE servers:", err);
