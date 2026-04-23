@@ -98,3 +98,8 @@ npm run start
   ```
 
 ---
+
+### Note for Self
+- Incase the websocket is not working, follow the steps
+- 1. Redeploy backend on Railway , get the twilio credentials from twilio dashboard on twilio website and add them in env
+  2. Change the backend url in frontend
